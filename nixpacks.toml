@@ -1,0 +1,11 @@
+# Fuerza la version de Python en el build de Nixpacks (coincide con .python-version)
+# y garantiza el binario `sqlite3` del sistema para inspeccion/debug manual.
+# El backup automatico (scripts/backup_db.py) NO depende de este binario: usa la stdlib.
+[phases.setup]
+nixPkgs = ["python312", "sqlite"]
+
+[phases.install]
+cmds = ["pip install --upgrade pip", "pip install -r requirements.txt"]
+
+[start]
+cmd = "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1"
