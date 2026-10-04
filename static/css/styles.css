@@ -409,6 +409,19 @@ input:focus, select:focus, textarea:focus {
     color: var(--text);
     font-size: 0.85rem;
 }
+.admin-producto-item.inactivo { opacity: 0.6; }
+.badge-inactivo {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: var(--danger);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.btn-reactivar { border-color: var(--success) !important; color: var(--success) !important; }
 
 /* ===== Modal ===== */
 .modal-overlay {

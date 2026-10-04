@@ -225,14 +225,16 @@ async function loadAdmin() {
 function renderAdminProductos(productos) {
     const container = $('#admin-productos');
     container.innerHTML = productos.map(p => `
-        <div class="admin-producto-item">
+        <div class="admin-producto-item ${p.activo ? '' : 'inactivo'}">
             <div class="admin-producto-info">
                 <div class="admin-producto-nombre">${p.nombre}</div>
-                <div class="admin-producto-meta">SKU: ${p.sku} · ${formatCOP(p.precio)} · Stock: ${p.stock} · ${p.activo ? 'Activo' : 'Inactivo'}</div>
+                <div class="admin-producto-meta">SKU: ${p.sku} · ${formatCOP(p.precio)} · Stock: ${p.stock} · ${p.activo ? 'Activo' : '<span class="badge-inactivo">Inactivo</span>'}</div>
             </div>
             <div class="admin-producto-actions">
                 <button class="btn-edit" data-id="${p.id}">Editar</button>
-                <button class="btn-delete" data-id="${p.id}">Eliminar</button>
+                ${p.activo
+                    ? `<button class="btn-delete" data-id="${p.id}">Desactivar</button>`
+                    : `<button class="btn-reactivar" data-id="${p.id}">Reactivar</button>`}
             </div>
         </div>
     `).join('');
@@ -284,10 +286,19 @@ async function saveProducto(e) {
 }
 
 async function deleteProducto(id) {
-    if (!confirm('¿Eliminar este producto?')) return;
+    if (!confirm('¿Desactivar este producto? Dejará de aparecer en el catálogo, pero los pedidos históricos y los carritos existentes se conservan.')) return;
     try {
         await api(`/api/productos/${id}`, { method: 'DELETE' });
-        showToast('Producto eliminado');
+        showToast('Producto desactivado');
+        loadAdmin();
+        loadProductos();
+    } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function reactivarProducto(id) {
+    try {
+        await api(`/api/productos/${id}`, { method: 'PUT', body: JSON.stringify({ activo: true }) });
+        showToast('Producto reactivado');
         loadAdmin();
         loadProductos();
     } catch (e) { showToast(e.message, 'error'); }
@@ -417,6 +428,8 @@ function initEventos() {
             if (prod) openModal(prod);
         } else if (e.target.classList.contains('btn-delete')) {
             deleteProducto(parseInt(id));
+        } else if (e.target.classList.contains('btn-reactivar')) {
+            reactivarProducto(parseInt(id));
         }
     });
 }
