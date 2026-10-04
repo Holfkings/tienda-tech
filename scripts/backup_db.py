@@ -54,9 +54,16 @@ def main() -> int:
     target = backup_dir / f"tienda-{stamp}.db"
 
     # Copia consistente y atomica-ish: se escribe en .tmp y luego se renombra.
+    # La API `backup` de sqlite3 lee la DB *con* su WAL, asi que incluye los
+    # cambios recientes aunque no se haya hecho checkpoint.
     tmp = target.with_suffix(".db.tmp")
     src = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+    filas_src = None
     try:
+        try:
+            filas_src = src.execute("SELECT count(*) FROM productos").fetchone()[0]
+        except sqlite3.Error:
+            pass
         dst = sqlite3.connect(str(tmp))
         try:
             src.backup(dst)
@@ -85,6 +92,17 @@ def main() -> int:
         return 1
 
     print(f"OK backup: {target} ({size} bytes, {tables} tablas, productos={filas}, integrity={integrity})")
+
+    # Aviso de completitud: la API `backup` incluye el WAL, asi que el conteo
+    # tiene que coincidir. Si no coincide, el backup quedo incompleto y NO sirve
+    # como punto de restauracion.
+    if filas_src is not None and filas is not None and filas != filas_src:
+        print(
+            f"ADVERTENCIA: el backup tiene {filas} productos pero la DB tiene {filas_src}. "
+            "Backup INCOMPLETO: no usar para restaurar.",
+            file=sys.stderr,
+        )
+        return 1
 
     # Retencion (ELIMINA archivos)
     limite = time.time() - retention_days * 86400

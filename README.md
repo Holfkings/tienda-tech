@@ -142,10 +142,33 @@ El script valida el backup (`PRAGMA integrity_check` + cuenta de tablas) y **des
 copia si salió corrupta o vacía. La retención **elimina** archivos de más de `RETENTION_DAYS` días.
 
 En Railway se ejecuta como **Cron Job** diario con
-`python scripts/backup_db.py /data/tienda.db /data/backups`.
+`python scripts/backup_db.py /data/tienda.db /data/backups`. El Cron Job debe ser un servicio
+**con el mismo volumen montado en `/data`** — si no, no ve la base de datos.
 
 > Un backup que vive en el mismo disco que la DB original no protege contra perder el
 > volumen. Una vez por semana hay que **bajarlo fuera de Railway**.
+
+### Por qué el backup usa `sqlite3.Connection.backup` y no un `cp`
+
+La app corre en modo **WAL** (`PRAGMA journal_mode=WAL` en `app/db.py`). Con WAL, las
+escrituras recientes viven en `tienda.db-wal` hasta que SQLite hace *checkpoint*; el archivo
+`tienda.db` por sí solo está **desactualizado**.
+
+| Copia | Qué incluye | Resultado |
+|---|---|---|
+| `cp tienda.db` (o un snapshot del disco) | solo el `.db`, sin el `-wal` | **pierde datos en silencio**, con `integrity_check = ok` |
+| `python scripts/backup_db.py` | `.db` + `-wal` (API de backup en línea) | consistente, incluso con la app escribiendo |
+
+Medido en este proyecto: con ~9.000 productos insertados y el WAL sin checkpoint,
+`cp tienda.db` devolvió **8.919** filas donde había **8.950** — 31 productos perdidos y un
+backup que *parece* sano. El script oficial devolvió las 8.950. Por eso el script también
+compara el conteo de `productos` de la DB contra el del backup y **falla con código 1** si
+no coincide.
+
+**Consecuencia práctica:** no hagas backup con `cp`, `tar` del volumen ni snapshots del
+disco mientras la app corre. Y no valides un backup solo con `PRAGMA integrity_check`:
+SQLite puede decir `ok` sobre una copia a la que le falta el WAL. El criterio real es
+**conteo de filas + integrity**.
 
 ## Comandos que modifican o eliminan información
 
