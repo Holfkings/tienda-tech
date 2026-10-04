@@ -2,6 +2,7 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -47,5 +48,14 @@ app.include_router(carrito.router)
 def health():
     return {"status": "ok", "env": ENVIRONMENT}
 
-# ===== Static files =====
-app.mount("/", StaticFiles(directory=_static_dir, html=True), name="static")
+# ===== Frontend estatico =====
+# Se monta en /static, NO en "/": el HTML y el seed referencian rutas con ese
+# prefijo (/static/css/styles.css, /static/js/main.js, /static/assets/*.svg).
+# Montar en "/" hacia que todos esos assets respondieran 404 y el frontend
+# quedara sin estilos ni JS (el 200 de "/" lo ocultaba).
+@app.get("/", include_in_schema=False)
+def index():
+    return FileResponse(os.path.join(_static_dir, "index.html"))
+
+
+app.mount("/static", StaticFiles(directory=_static_dir), name="static")

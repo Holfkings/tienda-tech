@@ -60,6 +60,42 @@ def test_frontend_servido(client):
     assert "text/html" in r.headers["content-type"]
 
 
+# ---------- assets estaticos ----------
+# Regresion: el frontend se montaba en "/" y todas las rutas con prefijo
+# /static/* respondian 404. El 200 de "/" ocultaba que la pagina cargaba sin
+# CSS ni JS, y las imagenes del seed tampoco se veian.
+
+def test_css_servido(client):
+    r = client.get("/static/css/styles.css")
+    assert r.status_code == 200
+    assert "text/css" in r.headers["content-type"]
+
+
+def test_js_servido(client):
+    r = client.get("/static/js/main.js")
+    assert r.status_code == 200
+    assert "javascript" in r.headers["content-type"]
+
+
+def test_index_referencia_rutas_que_existen(client):
+    """El HTML debe apuntar a assets que realmente se sirven."""
+    html = client.get("/").text
+    assert "/static/css/styles.css" in html
+    assert "/static/js/main.js" in html
+    for ruta in ("/static/css/styles.css", "/static/js/main.js"):
+        assert client.get(ruta).status_code == 200, f"{ruta} referenciado en el HTML pero da 404"
+
+
+def test_imagenes_del_seed_existen(client):
+    """Cada imagen_url de los productos debe resolver: sin esto el catalogo
+    sale con el placeholder en vez de la foto."""
+    productos = client.get("/api/productos", params={"limit": 500}).json()
+    rutas = {p["imagen_url"] for p in productos if p.get("imagen_url")}
+    assert rutas, "el seed no trae imagen_url"
+    for ruta in rutas:
+        assert client.get(ruta).status_code == 200, f"imagen del seed rota: {ruta}"
+
+
 # ---------- validacion de datos (Pydantic) ----------
 
 def test_precio_negativo_rechazado(client, admin_token):

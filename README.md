@@ -64,14 +64,14 @@ curl -s -o /dev/null -w '%{http_code}\n' -X PUT http://localhost:8000/api/produc
 ```
 tienda-tech/
 ├── app/
-│   ├── main.py          # FastAPI: monta /api/* y StaticFiles(static/)
+│   ├── main.py          # FastAPI: monta /api/*, sirve / y /static/*
 │   ├── db.py            # engine + DATABASE_URL desde env
 │   ├── models.py        # SQLAlchemy: Usuario, Producto, CarritoItem, Pedido, PedidoItem
 │   ├── schemas.py       # Pydantic: validación de entrada
 │   ├── auth.py          # bcrypt + JWT
 │   ├── seed.py          # run_seed() idempotente
 │   └── routers/         # productos, auth, carrito
-├── static/              # frontend (index.html, css, js)
+├── static/              # frontend (index.html, css, js, assets/*.svg)
 ├── tests/               # pytest: auth, validación, catálogo, carrito
 ├── scripts/
 │   ├── backup_db.py     # backup diario (stdlib, no requiere binario sqlite3)
