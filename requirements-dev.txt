@@ -1,0 +1,4 @@
+# Solo para desarrollo y CI. NO se instala en el contenedor de produccion.
+-r requirements.txt
+pytest==8.3.4
+httpx==0.28.1

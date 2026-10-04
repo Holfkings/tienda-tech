@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda Tech — Accesorios Tecnológicos</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <a href="/" class="logo">⚡ Tienda Tech</a>
+            <button class="hamburger" id="hamburger" aria-label="Menú">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="nav-links" id="nav-links">
+                <a href="/" data-nav="catalogo" class="nav-link active">Catálogo</a>
+                <a href="#" data-nav="admin" class="nav-link nav-admin" style="display:none">Admin</a>
+                <a href="#" data-nav="login" class="nav-link nav-login">Entrar</a>
+                <a href="#" data-nav="carrito" class="nav-link nav-carrito">
+                    🛒 <span class="carrito-count" id="carrito-count">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile menu -->
+    <div class="mobile-menu" id="mobile-menu">
+        <a href="/" data-nav="catalogo" class="mobile-link active">Catálogo</a>
+        <a href="#" data-nav="admin" class="mobile-link mobile-admin" style="display:none">Admin</a>
+        <a href="#" data-nav="login" class="mobile-link mobile-login">Entrar</a>
+        <a href="#" data-nav="carrito" class="mobile-link">🛒 Carrito (<span id="carrito-count-mobile">0</span>)</a>
+    </div>
+
+    <!-- Main content -->
+    <main class="main-content" id="main-content">
+        <!-- Catálogo -->
+        <section id="view-catalogo" class="view active">
+            <div class="hero">
+                <h1>Accesorios Tech</h1>
+                <p>Los mejores accesorios para tus dispositivos</p>
+            </div>
+            <div class="catalogo-controls">
+                <input type="search" id="buscador" placeholder="Buscar productos..." class="buscador">
+                <select id="filtro-categoria" class="filtro">
+                    <option value="">Todas las categorías</option>
+                </select>
+            </div>
+            <div class="productos-grid" id="productos-grid">
+                <!-- Productos se cargan dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Login / Registro -->
+        <section id="view-login" class="view">
+            <div class="auth-container">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Entrar</button>
+                    <button class="auth-tab" data-tab="register">Registrarse</button>
+                </div>
+                <form id="form-login" class="auth-form">
+                    <input type="email" id="login-email" placeholder="Email" required>
+                    <input type="password" id="login-password" placeholder="Contraseña" required>
+                    <button type="submit" class="btn btn-primary">Entrar</button>
+                </form>
+                <form id="form-register" class="auth-form" style="display:none">
+                    <input type="text" id="reg-nombre" placeholder="Nombre completo" required>
+                    <input type="email" id="reg-email" placeholder="Email" required>
+                    <input type="password" id="reg-password" placeholder="Contraseña (mín 6 caracteres)" required minlength="6">
+                    <button type="submit" class="btn btn-primary">Crear cuenta</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Admin -->
+        <section id="view-admin" class="view">
+            <div class="admin-container">
+                <h2>Panel de Administración</h2>
+                <button class="btn btn-primary" id="btn-nuevo-producto">+ Nuevo Producto</button>
+                <div class="admin-productos" id="admin-productos">
+                    <!-- Lista de productos para editar -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Carrito Drawer -->
+    <div class="carrito-overlay" id="carrito-overlay"></div>
+    <aside class="carrito-drawer" id="carrito-drawer">
+        <div class="carrito-header">
+            <h3>Tu Carrito</h3>
+            <button class="carrito-close" id="carrito-close">&times;</button>
+        </div>
+        <div class="carrito-items" id="carrito-items">
+            <!-- Items del carrito -->
+        </div>
+        <div class="carrito-footer">
+            <div class="carrito-total">
+                <span>Total:</span>
+                <strong id="carrito-total">$0</strong>
+            </div>
+            <button class="btn btn-primary btn-block" id="btn-comprar" disabled>Comprar</button>
+        </div>
+    </aside>
+
+    <!-- Modal producto admin -->
+    <div class="modal-overlay" id="modal-producto">
+        <div class="modal">
+            <h3 id="modal-title">Nuevo Producto</h3>
+            <form id="form-producto">
+                <input type="hidden" id="prod-id">
+                <input type="text" id="prod-sku" placeholder="SKU" required>
+                <input type="text" id="prod-nombre" placeholder="Nombre" required>
+                <textarea id="prod-descripcion" placeholder="Descripción"></textarea>
+                <input type="number" id="prod-precio" placeholder="Precio (COP)" required min="1" step="100">
+                <input type="number" id="prod-stock" placeholder="Stock" required min="0">
+                <input type="text" id="prod-categoria" placeholder="Categoría" required>
+                <input type="text" id="prod-imagen" placeholder="URL imagen (opcional)">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="prod-activo" checked> Activo
+                </label>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="modal-cancelar">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
